@@ -1,0 +1,19 @@
+## Quick Commands
+
+### Build the Package
+```powershell
+cd d:\KippoGramm\Kippo
+dotnet pack --configuration Release
+```
+
+### Publish to NuGet
+```powershell
+dotnet nuget push bin/Release/Kippo.1.0.0.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
+```
+
+### Before You Publish
+1. Update version in Kippo.csproj
+2. Update PackageReleaseNotes
+3. Update Authors and Company name
+4. Update repository URLs
+5. Test the package locally

@@ -5,7 +5,29 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    
+    <!-- NuGet Package Metadata -->
+    <PackageId>Kippo</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Your Name</Authors>
+    <Company>Your Company</Company>
+    <Description>A lightweight, attribute-based framework for building Telegram bots in .NET with support for session management, middleware, and intuitive routing.</Description>
+    <PackageTags>telegram;bot;telegram-bot;framework;dotnet;attributes;middleware;session</PackageTags>
+    <PackageProjectUrl>https://github.com/yourusername/KippoGramm</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/yourusername/KippoGramm</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <!-- <PackageIcon>icon.png</PackageIcon> Uncomment when you add an icon.png file -->
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageReleaseNotes>Initial release of Kippo framework for Telegram bot development.</PackageReleaseNotes>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <!-- <None Include="icon.png" Pack="true" PackagePath="\" /> Uncomment when you add an icon.png file -->
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore" Version="2.3.9" />

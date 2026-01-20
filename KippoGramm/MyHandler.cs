@@ -8,12 +8,46 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 public class MyHandler : BotUpdateHandler
 {
-    public MyHandler(ISessionStore sessionStore, IEnumerable<IBotMiddleware> middlewares) : base(sessionStore, middlewares){}
+    public MyHandler(ISessionStore sessionStore, IEnumerable<IBotMiddleware> middlewares) 
+        : base(sessionStore, middlewares) { }
 
     [Command("start")]
     public async Task Start(Context context)
     {
-        context.Session?.State = "ask_age";
+        var keyboard = ReplyKeyboardBuilder.Create()
+            .Button("📝 Register")
+            .Button("ℹ️ Info")
+            .Row()
+            .Button("❓ Help")
+            .Resize()
+            .Build();
+
+        await context.Reply(
+            "🤖 *Welcome to Kippo Demo Bot!*\n\n" +
+            "Choose an option to get started:",
+            keyboard
+        );
+    }
+
+    [Command("help")]
+    [Text(Pattern = "❓ Help")]
+    public async Task Help(Context context)
+    {
+        await context.Reply(
+            "📚 *Available Commands*\n\n" +
+            "/start - Show main menu\n" +
+            "/help - Show this message\n" +
+            "/register - Start registration\n" +
+            "/info - Show your info\n" +
+            "/menu - Show inline menu"
+        );
+    }
+
+    [Command("register")]
+    [Text(Pattern = "📝 Register")]
+    public async Task StartRegistration(Context context)
+    {
+        context.Session!.State = "ask_age";
 
         var keyboard = ReplyKeyboardBuilder.Create()
             .Button("Cancel ❌")
@@ -22,7 +56,7 @@ public class MyHandler : BotUpdateHandler
             .Build();
 
         await context.Reply(
-            "Welcome! 👋\n" +
+            "👤 *Let's get you registered!*\n\n" +
             "Please enter your age:",
             keyboard
         );
@@ -31,16 +65,25 @@ public class MyHandler : BotUpdateHandler
     [Text(State = "ask_age")]
     public async Task AskAge(Context context)
     {
-        if (!int.TryParse(context.Message.Text, out var age))
+        var text = context.Message.Text;
+
+        // Handle cancel
+        if (text == "Cancel ❌")
         {
-            await context.Reply("❌ Please enter a valid number.");
+            await Cancel(context);
             return;
         }
 
-        context.Session?.Data["age"] = age;
-        context.Session?.State = "ask_name";
+        if (!int.TryParse(text, out var age) || age < 13 || age > 120)
+        {
+            await context.Reply("❌ Please enter a valid age (13-120).");
+            return;
+        }
 
-        await context.Reply("Great 👍 Now enter your name:");
+        context.Session!.Data["age"] = age;
+        context.Session!.State = "ask_name";
+
+        await context.Reply("✅ Great! Now, what's your name?");
     }
 
     [Text(State = "ask_name")]
@@ -48,29 +91,170 @@ public class MyHandler : BotUpdateHandler
     {
         var name = context.Message.Text;
 
-        context.Session?.Data["name"] = name;
-        context.Session?.State = null;
+        if (string.IsNullOrWhiteSpace(name) || name.Length < 2)
+        {
+            await context.Reply("❌ Please enter a valid name (at least 2 characters).");
+            return;
+        }
+
+        context.Session!.Data["name"] = name;
+        context.Session!.State = "ask_country";
+
+        var keyboard = InlineKeyboardBuilder.Create()
+            .Button("🇺🇸 USA", "country_usa")
+            .Button("🇬🇧 UK", "country_uk")
+            .Row()
+            .Button("🇩🇪 Germany", "country_de")
+            .Button("🇫🇷 France", "country_fr")
+            .Row()
+            .Button("🌍 Other", "country_other")
+            .Build();
 
         await context.Reply(
-            $"✅ Saved!\n" +
-            $"Name: {name}\n" +
-            $"Age: {context.Session?.Data["age"]}",
-            new ReplyKeyboardRemove()
+            $"Nice to meet you, {name}! 👋\n\n" +
+            "Where are you from?",
+            keyboard
         );
+    }
+
+    [CallbackQuery("country_*")]
+    public async Task HandleCountry(Context context)
+    {
+        var country = context.Update.CallbackQuery!.Data!.Replace("country_", "").ToUpper();
+        var countryName = country switch
+        {
+            "USA" => "🇺🇸 United States",
+            "UK" => "🇬🇧 United Kingdom",
+            "DE" => "🇩🇪 Germany",
+            "FR" => "🇫🇷 France",
+            _ => "🌍 Other"
+        };
+
+        context.Session!.Data["country"] = countryName;
+        context.Session!.State = null; // Registration complete
+
+        var name = context.Session!.Data["name"];
+        var age = context.Session!.Data["age"];
+
+        // Answer the callback query to remove loading state
+        await context.Callback.Answer();
+
+        var keyboard = ReplyKeyboardBuilder.Create()
+            .Button("📝 Register")
+            .Button("ℹ️ Info")
+            .Row()
+            .Button("❓ Help")
+            .Resize()
+            .Build();
+
+        await context.Reply(
+            "🎉 *Registration Complete!*\n\n" +
+            $"📋 Your Info:\n" +
+            $"• Name: {name}\n" +
+            $"• Age: {age}\n" +
+            $"• Country: {countryName}",
+            keyboard
+        );
+    }
+
+    [Command("info")]
+    [Text(Pattern = "ℹ️ Info")]
+    public async Task ShowInfo(Context context)
+    {
+        if (context.Session?.Data.ContainsKey("name") != true)
+        {
+            await context.Reply(
+                "❌ You haven't registered yet!\n\n" +
+                "Use /register to get started."
+            );
+            return;
+        }
+
+        var name = context.Session!.Data["name"];
+        var age = context.Session!.Data["age"];
+        var country = context.Session!.Data.GetValueOrDefault("country", "Not set");
+
+        await context.Reply(
+            "📋 *Your Information*\n\n" +
+            $"• Name: {name}\n" +
+            $"• Age: {age}\n" +
+            $"• Country: {country}"
+        );
+    }
+
+    [Command("menu")]
+    public async Task ShowInlineMenu(Context context)
+    {
+        var keyboard = InlineKeyboardBuilder.Create()
+            .Button("✅ Option 1", "opt_1")
+            .Button("✅ Option 2", "opt_2")
+            .Row()
+            .Button("⚙️ Settings", "settings")
+            .Row()
+            .UrlButton("📖 Documentation", "https://github.com/yourusername/KippoGramm")
+            .Build();
+
+        await context.Reply(
+            "🔘 *Inline Menu*\n\n" +
+            "Choose an option:",
+            keyboard
+        );
+    }
+
+    [CallbackQuery("opt_*")]
+    public async Task HandleOption(Context context)
+    {
+        var option = context.Update.CallbackQuery!.Data!.Replace("opt_", "");
+        await context.Callback.Answer($"You selected Option {option}");
+        await context.Reply($"✅ You selected Option {option}!");
+    }
+
+    [CallbackQuery("settings")]
+    public async Task HandleSettings(Context context)
+    {
+        var keyboard = InlineKeyboardBuilder.Create()
+            .Button("🔔 Notifications", "set_notif")
+            .Button("🌐 Language", "set_lang")
+            .Row()
+            .Button("🔙 Back", "back_menu")
+            .Build();
+
+        await context.Reply(
+            "⚙️ *Settings*\n\n" +
+            "Configure your preferences:",
+            keyboard
+        );
+    }
+
+    [CallbackQuery("back_menu")]
+    public async Task BackToMenu(Context context)
+    {
+        await ShowInlineMenu(context);
     }
 
     [Text(Pattern = "Cancel ❌")]
     public async Task Cancel(Context context)
     {
-        context.Session?.State = null;
-        context.Session?.Data.Clear();
+        context.Session!.State = null;
+        context.Session!.Data.Clear();
 
-        await context.Reply("❌ Cancelled.");
+        var keyboard = ReplyKeyboardBuilder.Create()
+            .Button("📝 Register")
+            .Button("ℹ️ Info")
+            .Row()
+            .Button("❓ Help")
+            .Resize()
+            .Build();
+
+        await context.Reply("❌ Operation cancelled.", keyboard);
     }
 
-    [Text(Pattern = "21")]
+    [Text]
     public async Task GlobalTextHandler(Context context)
     {
-        await context.Reply($"Pattern : {context.Message.Text}");
+        await context.Reply(
+            $"📝 You said: _{context.Message.Text}_\n\n" +
+            "Use /help to see available commands."
+        );
     }
 }
