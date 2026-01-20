@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Kippo/Kippo.csproj" />
+  <Project Path="KippoGramm/KippoGramm.csproj" />
+</Solution>
