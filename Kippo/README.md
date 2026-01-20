@@ -1,5 +1,3 @@
-<div align="center">
-
 # 🤖 Kippo
 
 ### *Build Telegram Bots with Elegance*
@@ -13,15 +11,9 @@ with session management, middleware support, and intuitive routing.
 
 [Why Kippo?](#-why-kippo) • [Installation](#-installation) • [Get Started](#-getting-started) • [Documentation](#-documentation)
 
-</div>
-
 ---
 
 ## ✨ Why Kippo?
-
-<table>
-<tr>
-<td width="50%">
 
 ### 🎯 **Simple & Intuitive**
 Write bot handlers with clean attributes. No complex routing configuration or boilerplate code.
@@ -32,9 +24,6 @@ Built-in session management tracks user state and data automatically across conv
 ### 🔌 **Extensible**
 Add custom middleware for logging, auth, rate limiting, or any behavior you need.
 
-</td>
-<td width="50%">
-
 ### ⌨️ **Beautiful Keyboards**
 Fluent API for creating reply and inline keyboards with minimal code.
 
@@ -43,10 +32,6 @@ Seamless ASP.NET Core integration with dependency injection and hosting support.
 
 ### 📦 **Get Started Fast**
 Install via NuGet and have your bot running in under 5 minutes.
-
-</td>
-</tr>
-</table>
 
 ---
 
@@ -64,7 +49,7 @@ Install-Package Kippo
 
 **Via PackageReference**
 ```xml
-<PackageReference Include="Kippo" Version="1.0.0" />
+<PackageReference Include="Kippo" Version="1.0.1" />
 ```
 
 ---
@@ -199,11 +184,9 @@ using Kippo.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Register SessionMiddleware (automatic session management)
-builder.Services.AddSingleton<IBotMiddleware, SessionMiddleware>();
-
 // Register Kippo with your bot handler
-builder.Services.AddKippo<MyBotHandler>(builder.Configuration);
+builder.Services.AddKippo<MyHandler>(builder.Configuration)
+                .AddKippoMiddleware<SessionMiddleware>();//For Session Management
 
 var app = builder.Build();
 
@@ -515,11 +498,9 @@ using Kippo.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Register middleware (executes in order)
-builder.Services.AddSingleton<IBotMiddleware, LoggingMiddleware>();
-builder.Services.AddSingleton<IBotMiddleware, SessionMiddleware>();
-
-builder.Services.AddKippo<MyBotHandler>(builder.Configuration);
+builder.Services.AddKippo<MyBotHandler>(builder.Configuration)
+                .AddKippoMiddleware<LogginMiddleware>()
+                .AddKippoMiddleware<SessionMiddleware>();
 
 var app = builder.Build();
 app.Run();
