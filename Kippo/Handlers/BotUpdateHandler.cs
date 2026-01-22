@@ -7,10 +7,19 @@ namespace Kippo.Handlers;
 
 public abstract class BotUpdateHandler : IBotUpdateHandler
 {
-    private readonly CommandRouter _commandRouter;
-    private readonly ISessionStore _sessionStore;
+    private CommandRouter? _commandRouter;
+    private ISessionStore? _sessionStore;
+
+    protected BotUpdateHandler()
+    {
+    }
 
     protected BotUpdateHandler(ISessionStore sessionStore, IEnumerable<IBotMiddleware> middlewares)
+    {
+        Initialize(sessionStore, middlewares);
+    }
+
+    internal void Initialize(ISessionStore sessionStore, IEnumerable<IBotMiddleware> middlewares)
     {
         _sessionStore = sessionStore;
         _commandRouter = new CommandRouter(this);
@@ -26,6 +35,9 @@ public abstract class BotUpdateHandler : IBotUpdateHandler
         Update update,
         CancellationToken cancellationToken)
     {
+        if (_commandRouter == null || _sessionStore == null)
+            throw new InvalidOperationException("Handler not initialized. This should not happen if registered via AddKippo.");
+
         var context = new Context(botClient, update, cancellationToken, _sessionStore);
         await _commandRouter.RouteAsync(context);
     }

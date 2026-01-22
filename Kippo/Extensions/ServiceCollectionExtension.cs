@@ -1,4 +1,5 @@
 ﻿using Kippo.Handlers;
+using Kippo.Middleware;
 using Kippo.Services;
 using Kippo.SessionStorage;
 using Microsoft.Extensions.Configuration;
@@ -15,8 +16,22 @@ public static class ServiceCollectionExtension
             ?? throw new InvalidOperationException("Kippo:BotToken configuration is required.");
 
         AddBotClient(services, configuration);
-        services.AddSingleton<IBotUpdateHandler, THandler>();
         services.AddSingleton<ISessionStore,InMemorySessionStore>();
+        
+        services.AddSingleton<IBotUpdateHandler>(sp =>
+        {
+            var handler = ActivatorUtilities.CreateInstance<THandler>(sp);
+            
+            if (handler is BotUpdateHandler botHandler)
+            {
+                var sessionStore = sp.GetRequiredService<ISessionStore>();
+                var middlewares = sp.GetServices<IBotMiddleware>();
+                botHandler.Initialize(sessionStore, middlewares);
+            }
+            
+            return handler;
+        });
+        
         services.AddSingleton<BotUpdateHandlerAdapter>();
         services.AddHostedService<BotBackgroundService>();
         return services;

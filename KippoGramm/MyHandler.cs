@@ -8,9 +8,6 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 public class MyHandler : BotUpdateHandler
 {
-    public MyHandler(ISessionStore sessionStore, IEnumerable<IBotMiddleware> middlewares) 
-        : base(sessionStore, middlewares) { }
-
     [Command("start")]
     public async Task Start(Context context)
     {
