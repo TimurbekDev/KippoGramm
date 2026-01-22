@@ -49,7 +49,7 @@ Install-Package Kippo
 
 **Via PackageReference**
 ```xml
-<PackageReference Include="Kippo" Version="1.0.1" />
+<PackageReference Include="Kippo" Version="1.0.2" />
 ```
 
 ---
