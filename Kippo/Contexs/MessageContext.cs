@@ -9,5 +9,10 @@ public sealed class MessageContext
         _context = context;
     }
 
-    public string Text => _context.Update.Message!.Text!;
+    public string Text => _context.Update.Message?.Text 
+        ?? throw new InvalidOperationException(
+            "Message.Text is null. Ensure this property is only accessed for text messages. " +
+            $"Current update type: {_context.Update.Type}, " +
+            $"Message type: {_context.Update.Message?.Type.ToString() ?? "null"}"
+        );
 }

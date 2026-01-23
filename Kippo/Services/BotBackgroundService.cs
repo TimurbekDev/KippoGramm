@@ -7,8 +7,19 @@ public class BotBackgroundService(ITelegramBotClient botClient, BotUpdateHandler
 {
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        botClient.StartReceiving(updateHandler: updateHandler,
-            receiverOptions:new(),
+        var receiverOptions = new ReceiverOptions
+        {
+            AllowedUpdates = new[]
+            {
+                UpdateType.Message,
+                UpdateType.CallbackQuery,
+                UpdateType.EditedMessage
+            }
+        };
+        
+        botClient.StartReceiving(
+            updateHandler: updateHandler,
+            receiverOptions: receiverOptions,
             cancellationToken: stoppingToken);
 
         return Task.CompletedTask;

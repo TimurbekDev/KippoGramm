@@ -6,11 +6,11 @@
     <Nullable>enable</Nullable>
     
     <PackageId>Kippo</PackageId>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
     <Authors>Timurbek</Authors>
     <Company>Kippo</Company>
     <Description>A lightweight, attribute-based framework for building Telegram bots in .NET with support for session management, middleware, and intuitive routing.</Description>
-    <PackageTags>telegram;bot;telegram-bot;framework;dotnet;attributes;middleware;session</PackageTags>
+    <PackageTags>telegram;bot;telegram-bot;framework;dotnet;attributes;middleware;session;dependency-injection</PackageTags>
     <PackageProjectUrl>https://github.com/TimurbekDev/KippoGramm</PackageProjectUrl>
     <RepositoryUrl>https://github.com/TimurbekDev/KippoGramm</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -18,7 +18,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <PackageReleaseNotes>Initial release of Kippo framework for Telegram bot development.</PackageReleaseNotes>
+    <PackageReleaseNotes>v1.0.4: Production-ready improvements - Thread-safe sessions with ConcurrentDictionary, automatic service injection in handler methods, scoped service support, integrated ILogger, optimized network usage with AllowedUpdates, better error messages and null-safety. Breaking: ISessionStore.DeleteAsync method required.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

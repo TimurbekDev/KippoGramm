@@ -3,6 +3,8 @@ using Kippo.Contexs;
 using Kippo.Middleware;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kippo.Routers;
 
@@ -13,9 +15,11 @@ public class CommandRouter
     private readonly List<(CallbackQueryAttribute Attr, HandlerInfo Handler)> _callbackHandlers = new();
     private readonly List<(TextAttribute Attr, HandlerInfo Handler)> _textHandlers = new();
     private readonly List<IBotMiddleware> _middlewares = new();
+    private readonly ILogger? _logger;
 
-    public CommandRouter(object handlerInstance)
+    public CommandRouter(object handlerInstance, ILogger? logger = null)
     {
+        _logger = logger;
         RegisterHandlers(handlerInstance);
     }
 
@@ -35,6 +39,14 @@ public class CommandRouter
 
             foreach (var cmdAttr in method.GetCustomAttributes<CommandAttribute>())
             {
+                if (_commandHandlers.ContainsKey(cmdAttr.Command))
+                {
+                    _logger?.LogWarning(
+                        "Duplicate command registration: /{Command} in method {Method}. Previous registration will be overwritten.",
+                        cmdAttr.Command,
+                        method.Name);
+                }
+
                 _commandHandlers[cmdAttr.Command] = handlerInfo;
             }
 
@@ -50,6 +62,7 @@ public class CommandRouter
             }
         }
     }
+
     public async Task<bool> RouteAsync(Context context)
     {
         var index = -1;
@@ -138,6 +151,24 @@ public class CommandRouter
         var botClient = context.BotClient;
         var update = context.Update;
         var cancellationToken = context.CancellationToken;
+        
+        IServiceScope? scope = null;
+        IServiceProvider? serviceProvider = null;
+        
+        if (context.ServiceProvider != null)
+        {
+            var scopeFactory = context.ServiceProvider.GetService(typeof(IServiceScopeFactory)) as IServiceScopeFactory;
+            if (scopeFactory != null)
+            {
+                scope = scopeFactory.CreateScope();
+                serviceProvider = scope.ServiceProvider;
+            }
+            else
+            {
+                serviceProvider = context.ServiceProvider;
+            }
+        }
+
         var parameters = handler.Method.GetParameters();
         var args = new object?[parameters.Length];
 
@@ -157,15 +188,55 @@ public class CommandRouter
             else if (param.ParameterType == typeof(Context))
                 args[i] = context;
             else
-                args[i] = param.HasDefaultValue ? param.DefaultValue : null;
+            {
+                object? resolvedValue = null;
+
+                if (serviceProvider != null)
+                {
+                    try
+                    {
+                        resolvedValue = serviceProvider.GetService(param.ParameterType);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogWarning(ex,
+                            "Failed to resolve parameter {ParameterName} of type {ParameterType} for handler {HandlerMethod}",
+                            param.Name,
+                            param.ParameterType.Name,
+                            handler.Method.Name);
+                    }
+                }
+
+                if (resolvedValue == null && !param.HasDefaultValue && !IsNullable(param.ParameterType))
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot resolve required parameter '{param.Name}' of type '{param.ParameterType.Name}' " +
+                        $"for handler method '{handler.Method.DeclaringType?.Name}.{handler.Method.Name}'. " +
+                        $"Register the service in DI or make the parameter optional.");
+                }
+
+                args[i] = resolvedValue ?? (param.HasDefaultValue ? param.DefaultValue : null);
+            }
         }
 
-        var result = handler.Method.Invoke(handler.Instance, args);
-
-        if (result is Task task)
+        try
         {
-            await task;
+            var result = handler.Method.Invoke(handler.Instance, args);
+
+            if (result is Task task)
+            {
+                await task;
+            }
         }
+        finally
+        {
+            scope?.Dispose();
+        }
+    }
+
+    private static bool IsNullable(Type type)
+    {
+        return !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
     }
 
     private static bool IsTextMatch(TextAttribute attr, string text)

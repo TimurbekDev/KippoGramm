@@ -1,8 +1,10 @@
-﻿namespace Kippo.SessionStorage;
+﻿using System.Collections.Concurrent;
+
+namespace Kippo.SessionStorage;
 
 public class Session
 {
     public long UserId { get; set; }
     public string? State { get; set; }
-    public Dictionary<string, object> Data { get; set; } = new();
+    public ConcurrentDictionary<string, object> Data { get; set; } = new();
 }

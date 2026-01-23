@@ -2,15 +2,17 @@
 using Kippo.Contexs;
 using Kippo.Handlers;
 using Kippo.Keyboard;
-using Kippo.Middleware;
-using Kippo.SessionStorage;
-using Telegram.Bot.Types.ReplyMarkups;
+using KippoGramm;
 
 public class MyHandler : BotUpdateHandler
 {
     [Command("start")]
-    public async Task Start(Context context)
+    public async Task Start(Context context, IUserService userService)
     {
+        await userService.SetUserName(2,"Hello");
+
+        var namee = await userService.GetUserName(2);
+
         var keyboard = ReplyKeyboardBuilder.Create()
             .Button("📝 Register")
             .Button("ℹ️ Info")
@@ -156,13 +158,14 @@ public class MyHandler : BotUpdateHandler
 
     [Command("info")]
     [Text(Pattern = "ℹ️ Info")]
-    public async Task ShowInfo(Context context)
+    public async Task ShowInfo(Context context, IUserService userService)
     {
+        var name2 = await userService.GetUserName(2);
         if (context.Session?.Data.ContainsKey("name") != true)
         {
             await context.Reply(
                 "❌ You haven't registered yet!\n\n" +
-                "Use /register to get started."
+                $"Use /register to get started."
             );
             return;
         }

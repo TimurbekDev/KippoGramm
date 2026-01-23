@@ -18,5 +18,9 @@ public sealed class CallbackContext
         return _context.BotClient.AnswerCallbackQuery(callback.Id,text,showAlert,url,cacheTime);
     }
 
-    public string Data => _context.Update.CallbackQuery!.Data!;
+    public string Data => _context.Update.CallbackQuery?.Data 
+        ?? throw new InvalidOperationException(
+            "CallbackQuery.Data is null. Ensure this property is only accessed for callback queries with data. " +
+            $"Current update type: {_context.Update.Type}"
+        );
 }

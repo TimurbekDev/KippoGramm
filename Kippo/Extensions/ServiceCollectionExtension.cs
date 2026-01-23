@@ -4,6 +4,7 @@ using Kippo.Services;
 using Kippo.SessionStorage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 
 namespace Kippo.Extensions;
@@ -26,7 +27,10 @@ public static class ServiceCollectionExtension
             {
                 var sessionStore = sp.GetRequiredService<ISessionStore>();
                 var middlewares = sp.GetServices<IBotMiddleware>();
-                botHandler.Initialize(sessionStore, middlewares);
+                var loggerFactory = sp.GetService<ILoggerFactory>();
+                var logger = loggerFactory?.CreateLogger(typeof(THandler));
+                
+                botHandler.Initialize(sessionStore, middlewares, logger, sp);
             }
             
             return handler;

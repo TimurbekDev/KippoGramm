@@ -8,6 +8,7 @@ public class Context
     public ITelegramBotClient BotClient { get; }
     public CancellationToken CancellationToken { get; }
     public ISessionStore SessionStore { get; }
+    public IServiceProvider? ServiceProvider { get; }
 
     // Callback context
     public CallbackContext Callback {  get; }
@@ -18,7 +19,7 @@ public class Context
     //Session
     public Session? Session { get; set; }
 
-    public Context(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken,ISessionStore sessionStore)
+    public Context(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken,ISessionStore sessionStore, IServiceProvider? serviceProvider = null)
     {
         BotClient = botClient;
         Update = update;
@@ -26,6 +27,7 @@ public class Context
         Callback = new CallbackContext(this);
         Message = new MessageContext(this);
         SessionStore = sessionStore;
+        ServiceProvider = serviceProvider;
     }
 
 
@@ -35,12 +37,21 @@ public class Context
         {
             if (Update.Message != null)
                 return Update.Message.Chat.Id;
+            
+            if (Update.EditedMessage != null)
+                return Update.EditedMessage.Chat.Id;
 
             if (Update.CallbackQuery?.Message != null)
                 return Update.CallbackQuery.Message.Chat.Id;
+            
+            if (Update.MyChatMember != null)
+                return Update.MyChatMember.Chat.Id;
+            
+            if (Update.ChatMember != null)
+                return Update.ChatMember.Chat.Id;
 
             throw new InvalidOperationException(
-                "Update does not contain a chat id."
+                $"Update type '{Update.Type}' does not contain a chat id or is not supported."
             );
         }
     }

@@ -6,10 +6,24 @@ public class SessionMiddleware : IBotMiddleware
 {
     public async Task InvokeAsync(Context context, Func<Task> next)
     {
-        context.Session = await context.SessionStore.GetAsync(context.ChatId);
+        long chatId;
+        try
+        {
+            chatId = context.ChatId;
+        }
+        catch (InvalidOperationException)
+        {
+            await next();
+            return;
+        }
+        
+        context.Session = await context.SessionStore.GetAsync(chatId);
 
         await next();
 
-        await context.SessionStore.SaveAsync(context.ChatId, context.Session);
+        if (context.Session != null)
+        {
+            await context.SessionStore.SaveAsync(chatId, context.Session);
+        }
     }
 }

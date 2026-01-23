@@ -8,4 +8,5 @@ public interface ISessionStore
 {
     Task<Session> GetAsync(long chatId);
     Task SaveAsync(long chatId, Session session);
+    Task<bool> DeleteAsync(long chatId);
 }
