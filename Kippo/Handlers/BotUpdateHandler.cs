@@ -1,4 +1,5 @@
-﻿using Kippo.Contexs;
+﻿using System.Globalization;
+using Kippo.Contexs;
 using Kippo.Middleware;
 using Kippo.Routers;
 using Kippo.SessionStorage;
@@ -52,6 +53,8 @@ public abstract class BotUpdateHandler : IBotUpdateHandler
             throw new InvalidOperationException("Handler not initialized. This should not happen if registered via AddKippo.");
 
         var context = new Context(botClient, update, cancellationToken, _sessionStore, _serviceProvider);
+        
+        SetCulture(context.Session);
         await _commandRouter.RouteAsync(context);
     }
 
@@ -73,4 +76,14 @@ public abstract class BotUpdateHandler : IBotUpdateHandler
 
         return Task.CompletedTask;
     }
+
+    private void SetCulture(Session? session)
+    {
+        var lang = session?.Language ?? "en-US";
+        var culture = new CultureInfo(lang);
+
+        CultureInfo.CurrentCulture = culture;
+        CultureInfo.CurrentUICulture = culture;
+    }
+    
 }
