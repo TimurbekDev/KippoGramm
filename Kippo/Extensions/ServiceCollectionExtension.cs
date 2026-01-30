@@ -1,5 +1,6 @@
 ﻿using Kippo.Handlers;
 using Kippo.Handlers.OptionalHanlers;
+using Kippo.Localization;
 using Kippo.Middleware;
 using Kippo.Services;
 using Kippo.SessionStorage;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 
 
 namespace Kippo.Extensions;
@@ -29,6 +31,7 @@ public static class ServiceCollectionExtension
         services.AddSingleton<ISessionStore,InMemorySessionStore>();
         services.AddSingleton<IBotUpdateHandler>(sp =>
         {
+            var localizer = sp.GetService<IStringLocalizer<SharedResource>>();
             var handler = ActivatorUtilities.CreateInstance<THandler>(sp);
             
             if (handler is BotUpdateHandler botHandler)
@@ -38,7 +41,7 @@ public static class ServiceCollectionExtension
                 var loggerFactory = sp.GetService<ILoggerFactory>();
                 var logger = loggerFactory?.CreateLogger(typeof(THandler));
                 
-                botHandler.Initialize(sessionStore, middlewares, logger, sp);
+                botHandler.Initialize(sessionStore, middlewares, logger, sp, localizer);
             }
             
             return handler;

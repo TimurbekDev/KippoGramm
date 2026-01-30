@@ -16,5 +16,6 @@ services.AddKippo<MyHandler>(builder.Configuration,
 
 
 var app = builder.Build();
+app.UseRequestLocalization();
 
 app.Run();

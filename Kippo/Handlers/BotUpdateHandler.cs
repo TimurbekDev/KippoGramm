@@ -1,8 +1,10 @@
 ﻿using System.Globalization;
 using Kippo.Contexs;
+using Kippo.Localization;
 using Kippo.Middleware;
 using Kippo.Routers;
 using Kippo.SessionStorage;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
 namespace Kippo.Handlers;
@@ -12,6 +14,7 @@ public abstract class BotUpdateHandler : IBotUpdateHandler
     private CommandRouter? _commandRouter;
     private ISessionStore? _sessionStore;
     private IServiceProvider? _serviceProvider;
+    protected IStringLocalizer<SharedResource>? _l;
     protected ILogger? Logger { get; private set; }
 
     protected BotUpdateHandler()
@@ -31,11 +34,13 @@ public abstract class BotUpdateHandler : IBotUpdateHandler
         ISessionStore sessionStore,
         IEnumerable<IBotMiddleware> middlewares,
         ILogger? logger = null,
-        IServiceProvider? serviceProvider = null)
+        IServiceProvider? serviceProvider = null,
+        IStringLocalizer<SharedResource>? l = null)
     {
         _sessionStore = sessionStore;
         _serviceProvider = serviceProvider;
         Logger = logger;
+        _l = l; 
         _commandRouter = new CommandRouter(this, logger);
 
         foreach (IBotMiddleware middleware in middlewares)

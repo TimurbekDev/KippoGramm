@@ -3,9 +3,12 @@ using Kippo.Contexs;
 using Kippo.Handlers;
 using Kippo.Keyboard;
 using KippoGramm;
+using Microsoft.Extensions.Localization;
 
 public class MyHandler : BotUpdateHandler
 {
+
+
     [Command("start")]
     public async Task Start(Context context, IUserService userService)
     {
@@ -28,6 +31,13 @@ public class MyHandler : BotUpdateHandler
         );
     }
 
+    [Command("localization_checker")]
+    public async Task LocalizationChecker(Context context)
+    {
+        var text = _l["hello"];
+        await context.Reply(text);
+    }
+
     [Command("help")]
     [Text(Pattern = "❓ Help")]
     public async Task Help(Context context)
@@ -41,6 +51,7 @@ public class MyHandler : BotUpdateHandler
             "/menu - Show inline menu"
         );
     }
+    
 
     [Command("register")]
     [Text(Pattern = "📝 Register")]
@@ -75,14 +86,14 @@ public class MyHandler : BotUpdateHandler
 
         if (!int.TryParse(text, out var age) || age < 13 || age > 120)
         {
-            await context.Reply("❌ Please enter a valid age (13-120).");
+            await context.Reply("❌Please enter a valid age (13-120).");
             return;
         }
 
         context.Session!.Data["age"] = age;
         context.Session!.State = "ask_name";
 
-        await context.Reply("✅ Great! Now, what's your name?");
+        await context.Reply($"✅ Great! Now, what's your name?");
     }
 
     [Text(State = "ask_name")]
@@ -199,6 +210,15 @@ public class MyHandler : BotUpdateHandler
             "Choose an option:",
             keyboard
         );
+    }
+
+    [CallbackQuery("lang_*")]
+    public async Task HandleLanguage(Context context)
+    {
+        await context.Callback.Answer();
+        var language = context.Update.CallbackQuery!.Data!.Replace("lang_", "").ToUpper();
+        context.Session!.Language = language;
+        await context.Reply("done");
     }
 
     [CallbackQuery("opt_*")]
