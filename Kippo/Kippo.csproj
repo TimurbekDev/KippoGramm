@@ -6,16 +6,17 @@
     <Nullable>enable</Nullable>
     
     <PackageId>Kippo</PackageId>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
     <Authors>Timurbek</Authors>
     <Company>Kippo</Company>
     <Description>A lightweight, attribute-based framework for building Telegram bots in .NET with support for session management, middleware, and intuitive routing.</Description>
     <PackageTags>telegram;bot;telegram-bot;framework;dotnet;attributes;middleware;session;dependency-injection</PackageTags>
-    <PackageProjectUrl>https://github.com/TimurbekDev/KippoGramm</PackageProjectUrl>
+    <PackageProjectUrl>https://kippo.uz/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/TimurbekDev/KippoGramm</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>kippo-logo.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageReleaseNotes>v1.0.4: Production-ready improvements - Thread-safe sessions with ConcurrentDictionary, automatic service injection in handler methods, scoped service support, integrated ILogger, optimized network usage with AllowedUpdates, better error messages and null-safety. Breaking: ISessionStore.DeleteAsync method required.</PackageReleaseNotes>
@@ -23,6 +24,7 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="kippo-logo.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
