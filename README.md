@@ -3,6 +3,10 @@
 A lightweight, attribute-based framework for building Telegram bots in .NET.
 
 [![NuGet](https://img.shields.io/nuget/v/Kippo.svg)](https://www.nuget.org/packages/Kippo/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%209.0%20%7C%2010.0-purple.svg)](https://dotnet.microsoft.com/)
+
+🌐 **Website:** [https://kippo.uz](https://kippo.uz)
 
 ## Projects
 
@@ -67,8 +71,8 @@ app.Run();
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) before submitting a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](Kippo/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
